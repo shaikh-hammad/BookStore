@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Details</title>
+    <link rel="stylesheet" type="text/css" media="all"
+          href="../../static/css/style.css" th:href="@{/css/secure.css}" />
+</head>
+<body>
+<h1>Book Details</h1>
+<input type="hidden" name="isbn" id="isbn" th:value="${isbn}" />
+
+<table th:if="${book != null}">
+    <tr>
+        <th>Title</th>
+        <td th:text="${book.title}">Title Not Found</td>
+    </tr>
+    <tr>
+        <th>Author</th>
+        <td th:text="${book.author}">Author Not Found</td>
+    </tr>
+    <tr>
+        <th>Price</th>
+        <td th:text="'$' + ${#numbers.formatDecimal(book.price, 0, 'COMMA', 2, 'POINT')}">Price Not Found</td>
+    </tr>
+    <tr>
+        <th>Description</th>
+        <td th:text="${book.description}">Description Not Found</td>
+    </tr>
+    <tr>
+        <th>Add To Cart</th>
+        <td><form method="post" action="" th:action="@{/secure/addBookToCart}"
+                  th:object="${order}">
+            <input type="hidden" name="isbn2" id="isbn2" th:field="*{isbn}" />
+            Quantity: <input type="number" name="quantity" th:field="*{quantity}" /><br>
+            <script>document.getElementById('isbn2').value = document.getElementById('isbn').value;</script>
+            <input type="submit" value="Add" />
+        </form></td>
+    </tr>
+    <tr sec:authorize="hasRole('ADMIN')">
+        <th>Actions</th>
+        <td><a th:href="@{/secure/editBookByIsbn/}+${book.isbn}">Edit</a><br><br><a th:href="@{/secure/deleteBookByIsbn/}+${book.isbn}">Delete</a></td>
+    </tr>
+</table>
+<a href="/" class="button">Back to list</a>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Management System</title>
+    <script src="../static/js/validate.js" th:src="@{/js/validate.js}"></script>
+    <link rel="stylesheet" type="text/css" media="all"
+          href="../static/css/style.css" th:href="@{/css/style.css}" />
+</head>
+
+<body>
+<div class="container">
+    <h1>Welcome to the Inventory Management System</h1>
+    <h3>Hammad Shaikh</h3>
+    <h3>991702243</h3>
+    <h3 style="color: red" th:if="${error_message != null}" th:text="${error_message}"></h3>
+    <div style="color: red" id="error" class="error"></div>
+    <form name="form" method="post" action="" th:action="@{/insertUser}"
+          th:object="${user}" >
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" th:field="*{email}" required/><br>
+        <label for="password">New Password:</label>
+        <input type="password" id="password" name="password" th:field="*{encryptedPassword}" required/><br>
+        <label for="verifyPassword">Verify Password:</label>
+        <input type="password" id="verifyPassword" name="verifyPassword" required/><br>
+        <a href="javascript:void(0);" class="button" onclick="verify()">Create!</a>
+        <a href="/logon" class="button">Back</a>
+    </form>
+</div>
+</body>
+</html>

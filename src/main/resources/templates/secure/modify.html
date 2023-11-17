@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <link rel="stylesheet" type="text/css" media="all"
+          href="../../static/css/secure.css" th:href="@{/css/secure.css}" />
+</head>
+<body>
+<h1>Book Store</h1>
+<div class="button-container">
+    <a href="/" class="button">Back Home</a>
+    <a href="#" class="button" id="logoutLink">Logout</a>
+</div>
+<div sec:authorize="hasRole('ADMIN')">
+    <h3 style="padding-bottom: 0;margin-bottom: 0">Insert/Update Inventory</h3>
+    <form method="post" action="" th:action="@{/secure/insertBook}"
+          th:object="${book}">
+        <input type="hidden" name="isbn" th:field="*{isbn}"/>
+        Title: <input type="text" name="title" th:field="*{title}" /><br>
+        Author: <input type="text" name="author" th:field="*{author}" /><br>
+        Price: <input type="number" step="0.01" min="0" max="100" name="price" th:field="*{price}" /><br>
+        Description: <input type="text" name="description" th:field="*{description}" /><br>
+        <input type="submit" value="Submit" />
+    </form>
+</div>
+
+<form style="padding-top: 0; margin-top: 0" id="logoutForm" method="post" th:action="@{/logout}"></form>
+<script>
+    document.getElementById('logoutLink').addEventListener('click', function() {
+        document.getElementById('logoutForm').submit();
+    });
+</script>
+
+</body>
+</html>

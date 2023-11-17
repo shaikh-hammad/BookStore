@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cart</title>
+  <link rel="stylesheet" type="text/css" media="all"
+        href="../../static/css/secure.css" th:href="@{/css/secure.css}" />
+</head>
+<body>
+<h1>Book Store</h1>
+<div th:if="${cart != null && !cart.isEmpty()}" style="width: 100%">
+  <table>
+    <h3>Shopping Cart</h3>
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Author</th>
+        <th>Unit Price</th>
+        <th>Quantity</th>
+        <th>Subtotal</th>
+        <th colspan="3">Actions</th>
+      </tr>
+    </thead>
+    <tr th:each="o : ${cart}">
+      <td th:text="${da.getBookByIsbn(o.isbn).get(0).title}">title</td>
+      <td th:text="${da.getBookByIsbn(o.isbn).get(0).author}">author</td>
+      <td th:text="'$' + ${#numbers.formatDecimal(da.getBookByIsbn(o.isbn).get(0).price, 0, 'COMMA', 2, 'POINT')}">price</td>
+      <td th:text="${o.quantity}">quantity</td>
+      <td th:text="'$' + ${#numbers.formatDecimal((o.quantity * da.getBookByIsbn(o.isbn).get(0).price), 0, 'COMMA', 2, 'POINT')}">subtotal</td>
+      <td><a th:href="@{/secure/viewBookByIsbn/}+${o.isbn}">View</a></td>
+      <td sec:authorize="hasRole('ADMIN')"><a th:href="@{/secure/editBookByIsbn/}+${o.isbn}">Edit</a></td>
+      <td sec:authorize="hasRole('ADMIN')"><a th:href="@{/secure/deleteBookByIsbn/}+${o.isbn}">Delete</a></td>
+
+    </tr>
+  </table>
+  <p style="color: green; font-weight: bolder" th:text="'Total: $' + ${#numbers.formatDecimal(da.getCartTotal(cart), 0, 'COMMA', 2, 'POINT')}"></p>
+  <div class="button-container">
+    <a href="/secure/checkout" class="button">Checkout</a>
+    <a href="/" class="button">Back</a>
+  </div>
+</div>
+<div th:if="${cart == null || cart.isEmpty()}">
+  <h3>Your cart is empty!</h3>
+  <a style="margin-top: 20px" href="/" class="button">Back</a>
+</div>
+
+</body>
+</html>
