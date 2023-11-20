@@ -1,8 +1,3 @@
--- CREATE TABLE users(
---                      username VARCHAR(255),
---                      password VARCHAR(255),
---                      email VARCHAR(255)
--- );
 CREATE TABLE book(
                             isbn LONG PRIMARY KEY AUTO_INCREMENT,
                             title VARCHAR(255),

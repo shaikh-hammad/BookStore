@@ -9,7 +9,6 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -17,7 +16,10 @@ import java.util.List;
 public class DatabaseAccess {
     @Autowired
     protected NamedParameterJdbcTemplate jdbc;
-    // Method to find a user account by email
+
+    //User methods
+
+    //Method to find a user account by email
     public User findUserAccount(String email) {
         MapSqlParameterSource namedParameters = new
                 MapSqlParameterSource();
@@ -43,17 +45,19 @@ public class DatabaseAccess {
                 String.class);
     }
     public void insertUser(String username, String password) {
-
+        // Adding named parameters
         MapSqlParameterSource namedParameters = new MapSqlParameterSource();
-
         namedParameters.addValue("username", username);
         namedParameters.addValue("password", password);
-        // Adding a named parameter
 
         String query = "INSERT INTO sec_user(email, encryptedPassword, enabled) VALUES (:username, :password, 1)";  // Using the named parameter
 
         int rowsAffected = jdbc.update(query, namedParameters);
 
+        /*  By default, assign USER role to new accounts, In my opinion,
+            Admin roles should be applied manually by the administrator
+            in the database
+         */
         if (rowsAffected > 0){
             User user = findUserAccount(username);
             namedParameters.addValue("userId", user.getUserId());
@@ -64,16 +68,57 @@ public class DatabaseAccess {
         }
 
     }
-    public void insertBook(Book book) {
-
+    public List<User> getUserList() {
         MapSqlParameterSource namedParameters = new MapSqlParameterSource();
+        String query = "SELECT * FROM sec_user";
+        return jdbc.query(query, namedParameters, new
+                BeanPropertyRowMapper<User>(User.class));
+    }
+    public void insertAdmin(Long userId) {
+        // Adding named parameters
+        MapSqlParameterSource namedParameters = new MapSqlParameterSource();
+        namedParameters.addValue("userId", userId);
 
+        String query = "INSERT INTO user_role(userId, roleId) VALUES (:userId, 3)";  // Using the named parameter
+
+        int rowsAffected = jdbc.update(query, namedParameters);
+
+        /*  By default, assign USER role to new accounts, In my opinion,
+            Admin roles should be applied manually by the administrator
+            in the database
+         */
+        if (rowsAffected > 0){
+            System.out.println("User assigned role");
+        }
+
+    }
+    public void removeAdmin(Long userId) {
+        // Adding named parameters
+        MapSqlParameterSource namedParameters = new MapSqlParameterSource();
+        namedParameters.addValue("userId", userId);
+
+        String query = "DELETE FROM user_role WHERE userId = :userId AND roleId = 3";  // Using the named parameter
+
+        int rowsAffected = jdbc.update(query, namedParameters);
+
+        /*  By default, assign USER role to new accounts, In my opinion,
+            Admin roles should be applied manually by the administrator
+            in the database
+         */
+        if (rowsAffected > 0){
+            System.out.println("User removed role");
+        }
+
+    }
+    //Book Methods
+    public void insertBook(Book book) {
+        // Adding named parameters
+        MapSqlParameterSource namedParameters = new MapSqlParameterSource();
         namedParameters.addValue("isbn", book.getIsbn());
         namedParameters.addValue("title", book.getTitle());
         namedParameters.addValue("author", book.getAuthor());
         namedParameters.addValue("price", book.getPrice());
         namedParameters.addValue("description", book.getDescription());
-        // Adding a named parameter
 
         String query = "INSERT INTO book(title, author, price, description) VALUES (:title, :author, :price, :description)"; // Using the named parameter
 
@@ -117,48 +162,7 @@ public class DatabaseAccess {
         return jdbc.query(query, namedParameters, new
                 BeanPropertyRowMapper<Book>(Book.class));
     }
-    /*public void insertUser(User user) {
-
-        MapSqlParameterSource namedParameters = new MapSqlParameterSource();
-
-        namedParameters.addValue("username", user.getUsername());
-        namedParameters.addValue("password", user.getPassword());
-        namedParameters.addValue("email", user.getEmail());
-        // Adding a named parameter
-
-        String query = "INSERT INTO users(username, password, email) VALUES (:username, :password, :email)"; // Using the named parameter
-
-        int rowsAffected = jdbc.update(query, namedParameters);
-
-        if (rowsAffected > 0) System.out.println("User inserted into database");
-        if (rowsAffected > 0) System.out.println("User inserted into database");
-
-    }
-
-    public List<User> getUserList() {
-        MapSqlParameterSource namedParameters = new MapSqlParameterSource();
-        String query = "SELECT * FROM users";
-        return jdbc.query(query, namedParameters, new
-                BeanPropertyRowMapper<User>(User.class));
-    }
-    public List<User> getUserByUsername(String username) {
-        MapSqlParameterSource namedParameters = new MapSqlParameterSource();
-        String query = "SELECT * FROM users WHERE username = :username";
-        namedParameters.addValue("username", username);
-        return jdbc.query(query, namedParameters, new
-                BeanPropertyRowMapper<User>(User.class));
-    }
-    public boolean validateUser(String username, String password){
-        List<User> userList = getUserList();
-        for (User user:userList
-             ) {
-            if (user.getUsername().equals(username) && user.getPassword().equals(password))
-                return true;
-        }
-        return false;
-    }
-
-     */
+    //Checkout function to place orders
     public void insertOrders(List<Order> orderList) {
 
         MapSqlParameterSource namedParameters = new MapSqlParameterSource();
@@ -177,13 +181,5 @@ public class DatabaseAccess {
             if (rowsAffected > 0) System.out.println("Order inserted into database");
         }
 
-    }
-    public double getCartTotal(List<Order> ordersList){
-        double total = 0.0;
-        for (Order order:ordersList
-             ) {
-            total += order.getQuantity() * getBookByIsbn(order.getIsbn()).get(0).getPrice();
-        }
-        return total;
     }
 }

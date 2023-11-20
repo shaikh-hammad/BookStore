@@ -29,37 +29,16 @@ public class SecurityConfig {
         this.passwordEncoder = passwordEncoder;
         this.userDetailsManager = userDetailsManager;
     }
-    /*@Bean
-    public InMemoryUserDetailsManager userDetailsManager(PasswordEncoder passwordEncoder) {
-        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
-        manager.createUser(User.withUsername("guest@guest.com")
-                .password(passwordEncoder.encode("123"))
-                .roles("GUEST").build());
-        manager.createUser(User.withUsername("fahad.jan@sheridancollege.ca")
-                .password(passwordEncoder.encode("123"))
-                .roles("USER").build());
-        manager.createUser(User.withUsername("admin@admin.com")
-                .password(passwordEncoder.encode("123"))
-                .roles("USER", "ADMIN").build());
-        return manager;
-    }
-
-     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, HandlerMappingIntrospector
             introspector) throws Exception {
         MvcRequestMatcher.Builder mvc = new MvcRequestMatcher.Builder(introspector);
-        AntPathRequestMatcher logonMatcher = new AntPathRequestMatcher("/logon");
-        AntPathRequestMatcher logoutMatcher = new AntPathRequestMatcher("/logout");
-        AntPathRequestMatcher createMatcher = new AntPathRequestMatcher("/createUser");
-        AntPathRequestMatcher h2Console = new AntPathRequestMatcher("/h2-console/**");
-        AntPathRequestMatcher pDenied = new AntPathRequestMatcher("/permission-denied");
-        AntPathRequestMatcher secure = new AntPathRequestMatcher("/secure/**");
-        AntPathRequestMatcher index = new AntPathRequestMatcher("/");
-        AntPathRequestMatcher unsecure = new AntPathRequestMatcher("/**");
-        AntPathRequestMatcher images = new AntPathRequestMatcher("/images/**");
         http
                 .authorizeHttpRequests(authorize -> authorize
+                                .requestMatchers(mvc.pattern("/secure/insertBook")).hasRole("ADMIN")
+                                .requestMatchers(mvc.pattern("/secure/modify")).hasRole("ADMIN")
+                                .requestMatchers(mvc.pattern("/secure/manageUsers")).hasRole("ADMIN")
+                                .requestMatchers(mvc.pattern("/secure/toggleAdmin/**")).hasRole("ADMIN")
                                 .requestMatchers(mvc.pattern("/secure/**")).hasRole("USER")
                                 .requestMatchers(mvc.pattern("/")).permitAll()
                                 .requestMatchers(mvc.pattern("/createUser")).permitAll()
@@ -70,37 +49,20 @@ public class SecurityConfig {
                                 .requestMatchers(mvc.pattern("/permission-denied")).permitAll()
                                 .requestMatchers(AntPathRequestMatcher.antMatcher("/h2-console/**")).permitAll()
                                 //.requestMatchers(mvc.pattern("/**")).denyAll()
-                        //.requestMatchers(secure).hasRole("USER")
-                        //.requestMatchers(logonMatcher, logoutMatcher, createMatcher, h2Console, pDenied,index, images).permitAll()
-                        //.requestMatchers(unsecure).denyAll()
                 )
                 .csrf(csrf -> csrf.ignoringRequestMatchers(AntPathRequestMatcher.antMatcher("/h2- console/**")).disable())
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
-                .formLogin(form -> form.loginPage("/logon").permitAll())
+                .formLogin(form -> form.loginPage("/login").permitAll())
                 .exceptionHandling(exception -> exception.accessDeniedPage("/permission-denied"))
                 .logout(logout -> logout.permitAll());
-                /*
-                .formLogin(formLogin -> formLogin.loginPage("/logon")).logout(logout -> logout.permitAll())
-                .exceptionHandling(exception -> exception.accessDeniedPage("/permission-denied"))
-                .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
-                .csrf(csrf -> csrf
-                        .ignoringRequestMatchers(AntPathRequestMatcher.antMatcher("/h2-console/**")));
-
-                 */
         return http.build();
     }
     @Bean
     public PasswordEncoder encoder() {
         return new BCryptPasswordEncoder();
     }
-    public void addUser(String username, String password, String... roles) {
-        userDetailsManager.createUser(
-                User.withUsername(username)
-                        .password(passwordEncoder.encode(password))
-                        .roles(roles)
-                        .build()
-        );
-    }
+
+    //Get current authenticated user information
     public UserDetails getCurrentUser() {
         authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -112,6 +74,7 @@ public class SecurityConfig {
         }
         return null;
     }
+    //Quickly check for authentication
     public boolean isAuthenticated() {
         authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication.isAuthenticated();

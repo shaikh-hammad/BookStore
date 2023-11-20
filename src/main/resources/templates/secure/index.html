@@ -34,9 +34,10 @@
 <div class="button-container">
     <a href="/secure/shoppingCart" class="button">Cart</a>
     <a sec:authorize="hasRole('ADMIN')" href="/secure/modify" class="button">Insert Book</a>
+    <a sec:authorize="hasRole('ADMIN')" href="/secure/manageUsers" class="button">Manage Users</a>
     <a href="#" class="button" id="logoutLink" >Logout</a>
 </div>
-
+<p th:text="'User: ' + ${currentUser}"></p>
 <form style="padding-top: 0; margin-top: 0" id="logoutForm" method="post" th:action="@{/logout}"></form>
 <script>
     document.getElementById('logoutLink').addEventListener('click', function() {

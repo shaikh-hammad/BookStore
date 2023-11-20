@@ -33,7 +33,7 @@
 
     </tr>
   </table>
-  <p style="color: green; font-weight: bolder" th:text="'Total: $' + ${#numbers.formatDecimal(da.getCartTotal(cart), 0, 'COMMA', 2, 'POINT')}"></p>
+  <p style="color: green; font-weight: bolder" th:text="'Total: $' + ${#numbers.formatDecimal(cartTotal, 0, 'COMMA', 2, 'POINT')}"></p>
   <div class="button-container">
     <a href="/secure/checkout" class="button">Checkout</a>
     <a href="/" class="button">Back</a>

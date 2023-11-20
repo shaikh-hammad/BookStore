@@ -24,17 +24,16 @@ public class BookController {
     @Autowired
     private DatabaseAccess da;
     @Autowired
-    private UserDetailsServiceImpl userDetailsService;
-    @Autowired
     SecurityConfig securityConfig;
+    //Cart
     static List<Order> ordersList = new CopyOnWriteArrayList<>();
+    //Map stores user carts upon logout
     static Map<String, List<Order>> cartMap = new HashMap<>();
-    //static User currentUser;
     @GetMapping("/")
     public String index(Model model) {
         model.addAttribute("book", new Book());
         model.addAttribute("bookList", da.getBookList());
-
+        //check if user is authenticated, restore their previous cart from Map
         if (securityConfig.isAuthenticated() && securityConfig.getCurrentUser() != null){
             if (cartMap.get(securityConfig.getCurrentUser().getUsername()) != null){
                 ordersList = cartMap.get(securityConfig.getCurrentUser().getUsername());
@@ -45,22 +44,26 @@ public class BookController {
             return "redirect:/secure";
         }
 
-        return "logon";
+        return "login";
 
     }
+    //Homepage in secure folder
     @GetMapping("/secure")
     public String secureIndex(Model model) {
         model.addAttribute("book", new Book());
         model.addAttribute("bookList", da.getBookList());
         model.addAttribute("cart", ordersList);
         model.addAttribute("cartMap", cartMap);
+        model.addAttribute("currentUser", securityConfig.getCurrentUser().getUsername());
         return "/secure/index";
     }
+    //Admin access to modifying inventory
     @GetMapping("/secure/modify")
     public String modify(Model model) {
         model.addAttribute("book", new Book());
         return "/secure/modify";
     }
+    //Form handler for inventory management
     @PostMapping("/secure/insertBook")
     public String insertBook(Model model, @ModelAttribute Book book){
         List<Book> existingBooks = da.getBookByIsbn(book.getIsbn());
@@ -86,8 +89,6 @@ public class BookController {
 
         Book book = da.getBookByIsbn(isbn).get(0);
 
-        //da.updateBook(book);
-
         model.addAttribute("book", book);
         model.addAttribute("bookList", da.getBookList());
 
@@ -104,31 +105,35 @@ public class BookController {
 
         return "secure/book";
     }
+    //Shopping cart controller
     @GetMapping("/secure/shoppingCart")
     public String shoppingCart(Model model) {
         //model.addAttribute("currentUser", currentUser);
         model.addAttribute("cart", ordersList);
         model.addAttribute("da", da);
+        model.addAttribute("cartTotal", getCartTotal(ordersList));
 
         return "secure/cart";
     }
+    //Logic for adding book to user cart
     @PostMapping("/secure/addBookToCart")
     public String addBookToCart(Model model, @ModelAttribute Order order){
+        //Add authenticated user's email to order info
         order.setUsername(securityConfig.getCurrentUser().getUsername());
+        //Calculate subtotal for each order
         order.setTotal(order.getQuantity() * da.getBookByIsbn(order.getIsbn()).get(0).getPrice());
-        System.out.println(order);
-        System.out.println(securityConfig.getCurrentUser().getUsername());
+        //Add order to cart and save to Map
         ordersList.add(order);
-        System.out.println(ordersList);
         saveCart();
         model.addAttribute("book", new Book());
         model.addAttribute("bookList", da.getBookList());
         return "secure/index";
     }
+    //Checkout controller
     @GetMapping("/secure/checkout")
     public String checkout(Model model){
-        da.insertOrders(ordersList);
-        ordersList = new CopyOnWriteArrayList<>();
+        da.insertOrders(ordersList);    //insert orders to database
+        ordersList = new CopyOnWriteArrayList<>();  //clear cart and save to Map
         saveCart();
         model.addAttribute("book", new Book());
         model.addAttribute("bookList", da.getBookList());
@@ -136,5 +141,13 @@ public class BookController {
     }
     public void saveCart(){
         cartMap.put(securityConfig.getCurrentUser().getUsername(), ordersList);
+    }
+    public double getCartTotal(List<Order> ordersList){
+        double total = 0.0;
+        for (Order order:ordersList
+        ) {
+            total += order.getQuantity() * da.getBookByIsbn(order.getIsbn()).get(0).getPrice();
+        }
+        return total;
     }
 }
