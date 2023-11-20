@@ -53,11 +53,6 @@ public class DatabaseAccess {
         String query = "INSERT INTO sec_user(email, encryptedPassword, enabled) VALUES (:username, :password, 1)";  // Using the named parameter
 
         int rowsAffected = jdbc.update(query, namedParameters);
-
-        /*  By default, assign USER role to new accounts, In my opinion,
-            Admin roles should be applied manually by the administrator
-            in the database
-         */
         if (rowsAffected > 0){
             User user = findUserAccount(username);
             namedParameters.addValue("userId", user.getUserId());
@@ -82,11 +77,6 @@ public class DatabaseAccess {
         String query = "INSERT INTO user_role(userId, roleId) VALUES (:userId, 3)";  // Using the named parameter
 
         int rowsAffected = jdbc.update(query, namedParameters);
-
-        /*  By default, assign USER role to new accounts, In my opinion,
-            Admin roles should be applied manually by the administrator
-            in the database
-         */
         if (rowsAffected > 0){
             System.out.println("User assigned role");
         }
@@ -100,11 +90,6 @@ public class DatabaseAccess {
         String query = "DELETE FROM user_role WHERE userId = :userId AND roleId = 3";  // Using the named parameter
 
         int rowsAffected = jdbc.update(query, namedParameters);
-
-        /*  By default, assign USER role to new accounts, In my opinion,
-            Admin roles should be applied manually by the administrator
-            in the database
-         */
         if (rowsAffected > 0){
             System.out.println("User removed role");
         }
