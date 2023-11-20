@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" type="text/css" media="all"
+          href="../../static/css/secure.css" th:href="@{/css/secure.css}" />
+</head>
+<body>
+<h1>Book Store</h1>
+<table th:if="${userList != null && userList != ''}">
+    <h3>Inventory List</h3>
+    <thead>
+    <tr>
+        <th>Email</th>
+        <th>Roles</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tr th:each="u : ${userList}">
+        <td th:text="${u.email}">title</td>
+        <td th:text="${da.getRolesById(u.userId)}">title</td>
+        <td><a th:href="@{/secure/toggleAdmin/}+${u.userId}">Toggle Admin Status</a></td>
+
+    </tr>
+</table>
+<div class="button-container">
+    <a href="/" class="button">Back</a>
+    <a href="#" class="button" id="logoutLink" >Logout</a>
+</div>
+<p th:text="'User: ' + ${currentUser}"></p>
+<form style="padding-top: 0; margin-top: 0" id="logoutForm" method="post" th:action="@{/logout}"></form>
+<script>
+    document.getElementById('logoutLink').addEventListener('click', function() {
+        document.getElementById('logoutForm').submit();
+    });
+</script>
+
+</body>
+</html>
