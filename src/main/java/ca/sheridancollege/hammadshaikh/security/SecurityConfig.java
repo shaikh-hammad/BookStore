@@ -35,11 +35,11 @@ public class SecurityConfig {
         MvcRequestMatcher.Builder mvc = new MvcRequestMatcher.Builder(introspector);
         http
                 .authorizeHttpRequests(authorize -> authorize
+                                .requestMatchers(mvc.pattern("/secure/**")).hasRole("USER")
                                 .requestMatchers(mvc.pattern("/secure/insertBook")).hasRole("ADMIN")
                                 .requestMatchers(mvc.pattern("/secure/modify")).hasRole("ADMIN")
                                 .requestMatchers(mvc.pattern("/secure/manageUsers")).hasRole("ADMIN")
                                 .requestMatchers(mvc.pattern("/secure/toggleAdmin/**")).hasRole("ADMIN")
-                                .requestMatchers(mvc.pattern("/secure/**")).hasRole("USER")
                                 .requestMatchers(mvc.pattern("/")).permitAll()
                                 .requestMatchers(mvc.pattern("/createUser")).permitAll()
                                 .requestMatchers(mvc.pattern("/insertUser")).permitAll()
